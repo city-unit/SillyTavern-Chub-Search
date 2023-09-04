@@ -7,7 +7,7 @@ import {
 } from "../../../../script.js";
 import { extension_settings } from "../../../extensions.js";
 
-const extensionName = "chub";
+const extensionName = "st-chub-search";
 const extensionFolderPath = `scripts/extensions/${extensionName}/`;
 
 // Endpoint for API call
@@ -249,7 +249,7 @@ async function getCharacter(fullPath) {
 
 
 jQuery(async () => {
-    const settingsHtml = await $.get("scripts/extensions/third-party/chub/dropdown.html");
+    const settingsHtml = await $.get("scripts/extensions/third-party/st-chub-search/dropdown.html");
     // Append settingsHtml to extensions_settings
     $("#extensions_settings2").append(settingsHtml);
 
