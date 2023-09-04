@@ -86,21 +86,30 @@ function updateCharacterListInView(characters) {
     }
 }
 
-async function fetchCharactersBySearch(query) {
-    console.log(extension_settings.chub);
-    // Example search: https://api.chub.ai/api/characters/search?first=40&page=1&sort=download_count&asc=false&include_forks=false&nsfw=false&require_images=false&require_custom_prompt=false
+async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, nsfw, sort }) {
+    if (!searchTerm) {
+        return [];
+    }
     let first = extension_settings.chub.findCount;
     let page = 1;
-    let sort = "download_count";
     let asc = false;
     let include_forks = false;
-    let nsfw = extension_settings.chub.nsfw;
+    nsfw = nsfw || extension_settings.chub.nsfw;  // Default to extension settings if not provided
     let require_images = false;
     let require_custom_prompt = false;
-    let search = query;
-    let searchResponse = await fetch(
-        `${API_ENDPOINT_SEARCH}?search=${encodeURIComponent(query)}&first=${first}&page=1&sort=${sort}&asc=${asc}&include_forks=${include_forks}&nsfw=${nsfw}&require_images=${require_images}&require_custom_prompt=${require_custom_prompt}`
-    );
+
+    // Construct the URL with the search parameters
+    let url = `${API_ENDPOINT_SEARCH}?search=${encodeURIComponent(searchTerm)}&first=${first}&page=${page}&sort=${sort}&asc=${asc}&include_forks=${include_forks}&nsfw=${nsfw}&require_images=${require_images}&require_custom_prompt=${require_custom_prompt}`;
+
+    if (includeTags.length > 0) {
+        url += `&include_tags=${encodeURIComponent(includeTags.join(','))}`;
+    }
+
+    if (excludeTags.length > 0) {
+        url += `&exclude_tags=${encodeURIComponent(excludeTags.join(','))}`;
+    }
+
+    let searchResponse = await fetch(url);
 
     let searchData = await searchResponse.json();
 
@@ -126,8 +135,15 @@ async function fetchCharactersBySearch(query) {
 }
 
 // Execute character search and update UI
-async function executeCharacterSearch(query) {
-    const characters = await fetchCharactersBySearch(query);
+async function executeCharacterSearch(options) {
+    if (characterListContainer && !document.body.contains(characterListContainer)) {
+        characterListContainer = null;
+    }
+
+    const characters = await fetchCharactersBySearch(options);
+    if(!characterListContainer) {
+        displayCharactersInListViewPopup();
+    }
 
     if (characters.length > 0) {
         if (!characterListContainer) {
@@ -138,68 +154,40 @@ async function executeCharacterSearch(query) {
     }
 }
 
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-};
-
 // Generate a character list item
 function generateCharacterListItem(character, index) {
     return `
         <div class="character-list-item" data-index="${index}">
             <img class="thumbnail" src="${character.url}">
             <div class="info">
-                <div class="name">${character.name || "Default Name"}</div>
+                <div class="name">${character.name || "Default Name"} by ${character.author}</div>
                 <div class="description">${character.description}</div>
+                <div class="tags">${character.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
             </div>
             <button class="download-btn" data-path="${character.fullPath}">Download</button>
         </div>
     `;
 }
 
-function displayHoverPreview(item, character) {
-    const previewLayout = `
-        <div class="character-preview">
-            <img class="preview-image" src="${character.url}">
-            <div class="preview-info">
-                <div class="name">${character.name || "Default Name"}</div>
-                <div class="description">${character.description}</div>
-            </div>
-        </div>
-    `;
-
-    const preview = document.createElement('div');
-    preview.classList.add('character-preview-container');
-    preview.innerHTML = previewLayout;
-    document.body.appendChild(preview);
-
-    const rect = item.getBoundingClientRect();
-    const previewRect = preview.getBoundingClientRect();
-    const top = rect.top - previewRect.height / 2 + rect.height / 2;
-    const left = rect.left - previewRect.width / 2 + rect.width / 2;
-
-    preview.style.top = `${top}px`;
-    preview.style.left = `${left}px`;
-
-    item.addEventListener('mouseleave', function (event) {
-        preview.remove();
-    });
-}
-
 function displayCharactersInListViewPopup() {
     const listLayout = `
-        <div class="search-container">
-            <input type="text" id="characterSearchInput" placeholder="Search for characters...">
-        </div>
-        <div class="character-list-popup">
-            ${chubCharacters.map((character, index) => generateCharacterListItem(character, index)).join('')}
+        <div class="list-and-search-wrapper">
+            <div class="character-list-popup">
+                ${chubCharacters.map((character, index) => generateCharacterListItem(character, index)).join('')}
+            </div>
+            <div class="search-container">
+                <input type="text" id="characterSearchInput" placeholder="Search for characters...">
+                <input type="text" id="includeTags" placeholder="Include tags (comma separated)">
+                <input type="text" id="excludeTags" placeholder="Exclude tags (comma separated)">
+                <select id="sortOrder">
+                    <option value="download_count">Most Downloaded</option>
+                    <option value="recent">Most Recent</option>
+                    <!-- Add more sort options as needed -->
+                </select>
+                <label for="nsfwCheckbox">NSFW:</label>
+                <input type="checkbox" id="nsfwCheckbox">
+                <button id="characterSearchButton">Search</button>
+            </div>
         </div>
     `;
 
@@ -207,25 +195,59 @@ function displayCharactersInListViewPopup() {
     callPopup(listLayout, "text", '', { okButton: "Close", wide: true, large: true });
     characterListContainer = document.querySelector('.character-list-popup');
 
-    document.querySelector('.character-list-popup').addEventListener('click', async function (event) {
-        if (event.target && event.target.classList.contains('download-btn')) {
+    characterListContainer.addEventListener('mouseover', function (event) {
+        if (event.target.tagName === 'IMG') {
+            const image = event.target;
+            const rect = image.getBoundingClientRect();
+
+            const clone = image.cloneNode(true);
+            clone.style.position = 'absolute';
+            clone.style.top = `${rect.top + window.scrollY}px`;
+            clone.style.left = `${rect.left + window.scrollX}px`;
+            clone.style.transform = 'scale(4)'; // Enlarge by 4 times
+            clone.style.zIndex = 99999; // High value to ensure it's above other elements
+
+            document.body.appendChild(clone);
+
+            // Cleanup on mouse leave or move out
+            clone.addEventListener('mouseleave', function handler() {
+                document.body.removeChild(clone);
+                clone.removeEventListener('mouseleave', handler);
+            });
+        }
+    });
+
+    characterListContainer.addEventListener('click', async function (event) {
+        if (event.target.classList.contains('download-btn')) {
             downloadCharacter(event.target.getAttribute('data-path'));
         }
     });
 
-    document.querySelectorAll('.character-list-item .img').forEach(item => {
-        const index = parseInt(item.getAttribute('data-index'));
-        const character = chubCharacters[index];
-        item.addEventListener('mouseenter', () => displayHoverPreview(item, character));
-    });
+    // Combine the 'keydown' and 'click' event listeners for search functionality
+    const handleSearch = function (e) {
+        if (e.type === 'keydown' && e.key !== 'Enter') return;
 
-    document.getElementById('characterSearchInput').addEventListener('input', debounce(function (e) {
-        const searchTerm = e.target.value;
-        if (searchTerm) {  // Only search if there is a value to search for
-            executeCharacterSearch(searchTerm);
+        const searchTerm = document.getElementById('characterSearchInput').value;
+        const includeTags = document.getElementById('includeTags').value.split(',').map(tag => tag.trim());
+        const excludeTags = document.getElementById('excludeTags').value.split(',').map(tag => tag.trim());
+        const nsfw = document.getElementById('nsfwCheckbox').checked;
+        const sort = document.getElementById('sortOrder').value;
+
+        if (searchTerm || includeTags.length || excludeTags.length) { // Only search if there are values
+            executeCharacterSearch({
+                searchTerm,
+                includeTags,
+                excludeTags,
+                nsfw,
+                sort
+            });
         }
-    }, 500));
+    };
+
+    document.getElementById('characterSearchInput').addEventListener('keydown', handleSearch);
+    document.getElementById('characterSearchButton').addEventListener('click', handleSearch);
 }
+
 
 async function getCharacter(fullPath) {
     let response = await fetch(
