@@ -1,0 +1,144 @@
+/* General styles */
+.image-viewer {
+    position: relative;
+    width: 300px;
+    height: 400px;
+    overflow: hidden;
+}
+
+#displayImage, #popupDisplayImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Navigation arrows */
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    font-size: 24px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.prev {
+    left: 0;
+}
+
+.next {
+    right: 0;
+}
+
+/* Popup styles */
+.character-viewer-popup {
+    position: relative;
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+.character-viewer-popup img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.overlay-text {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.overlay-text .name {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.overlay-text .description {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+/* List view styles */
+.character-list-popup {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.character-list-item {
+    display: flex;
+    align-items: center;  /* aligns items vertically in the middle */
+    margin: 10px 0;      /* space between each list item */
+    justify-content: space-between;  /* pushes content to the far edges */
+}
+
+.download-btn {
+    background-color: #4CAF50;  /* green background */
+    border: none;
+    color: white;
+    padding: 8px 15px;  /* adjust padding as needed */
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 0 10px;  /* optional space between button and edge */
+    cursor: pointer;
+    border-radius: 4px;  /* optional rounded corners */
+}
+
+.download-btn:hover {
+    background-color: #45a049;  /* slightly darker green for hover effect */
+}
+
+
+.thumbnail {
+    flex: 0 0 100px; /* this gives a fixed width of 100px to thumbnails, adjust as needed */
+    height: 100px;  /* adjust height as needed */
+    object-fit: cover;
+    margin-right: 10px; /* space between thumbnail and description */
+}
+
+.info {
+    flex: 1;  /* allows the description to take up the rest of the space */
+    text-align: left;  /* aligns content to the left */
+    overflow: hidden;  /* in case of long text */
+}
+
+.name {
+    font-weight: bold;  /* Makes the name stand out */
+    margin-bottom: 5px;
+    text-align: left;  /* aligns content to the left */
+}
+
+.description {
+    color: #666;  /* Darkens the description text slightly */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;  /* Ensures that long descriptions end in an ellipsis */
+    text-align: left;  /* aligns content to the left */
+}
+
+.search-container {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+#characterSearchInput {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
