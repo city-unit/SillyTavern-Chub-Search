@@ -9,10 +9,6 @@
     overflow-y: auto;  /* This ensures that if the list grows too long, it becomes scrollable. */
 }
 
-.search-container {
-    /* You can add additional styles if needed */
-}
-
 
 .character-list-item {
     display: flex;
@@ -22,7 +18,7 @@
 }
 
 .download-btn {
-    background-color: #4CAF50;  /* green background */
+    background-color: var(--SmartThemeEmColor);
     border: none;
     color: white;
     padding: 8px 15px;  /* adjust padding as needed */
@@ -40,26 +36,33 @@
 }
 
 
-.thumbnail {
+.character-list-item img.thumbnail {
     flex: 0 0 100px; /* this gives a fixed width of 100px to thumbnails, adjust as needed */
     height: 100px;  /* adjust height as needed */
     object-fit: cover;
     margin-right: 10px; /* space between thumbnail and description */
 }
 
-.info {
+body img.thumbnail {
+    width: 100px;  /* adjust width as needed */
+    height: 100px;  /* adjust height as needed */
+    object-fit: cover;
+    margin-right: 10px; /* space between thumbnail and description */
+}
+
+.character-list-item .info {
     flex: 1;  /* allows the description to take up the rest of the space */
     text-align: left;  /* aligns content to the left */
     overflow: hidden;  /* in case of long text */
 }
 
-.name {
+.character-list-item .info .name {
     font-weight: bold;  /* Makes the name stand out */
     margin-bottom: 5px;
     text-align: left;  /* aligns content to the left */
 }
 
-.description {
+.character-list-item .info .description {
     color: #666;  /* Darkens the description text slightly */
     white-space: nowrap;
     overflow: hidden;
@@ -67,8 +70,17 @@
     text-align: left;  /* aligns content to the left */
 }
 
+.character-list-item .info .tags{
+    margin-top: 10px;
+}
+
 .search-container {
     padding: 10px;
     margin-top: 10px;
 }
 
+.character-list-item .info .author {
+    font-size: 0.8em; /* This makes the author text 80% of its original size. Adjust as needed. */
+    color: var(--SmartThemeQuoteColor)
+
+}

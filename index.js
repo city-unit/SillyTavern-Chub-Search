@@ -20,10 +20,9 @@ const defaultSettings = {
 };
 
 let chubCharacters = [];
-let currentIndex = 0;
 let characterListContainer = null;  // A global variable to hold the reference
 let popupState = null;
-
+let savedPopupContent = null;
 
 
 /**
@@ -89,9 +88,7 @@ function updateCharacterListInView(characters) {
 }
 
 async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, nsfw, sort }) {
-    if (!searchTerm) {
-        return [];
-    }
+
     let first = extension_settings.chub.findCount;
     let page = 1;
     let asc = false;
@@ -99,15 +96,18 @@ async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, n
     nsfw = nsfw || extension_settings.chub.nsfw;  // Default to extension settings if not provided
     let require_images = false;
     let require_custom_prompt = false;
+    searchTerm = searchTerm ? `search=${encodeURIComponent(searchTerm)}&` : '';
+    sort = sort || 'download_count';
 
-    // Construct the URL with the search parameters
-    let url = `${API_ENDPOINT_SEARCH}?search=${encodeURIComponent(searchTerm)}&first=${first}&page=${page}&sort=${sort}&asc=${asc}&include_forks=${include_forks}&nsfw=${nsfw}&require_images=${require_images}&require_custom_prompt=${require_custom_prompt}`;
+    // Construct the URL with the search parameters, if any
+    // 
+    let url = `${API_ENDPOINT_SEARCH}?${searchTerm}first=${first}&page=${page}&sort=${sort}&asc=${asc}&include_forks=${include_forks}&nsfw=${nsfw}&require_images=${require_images}&require_custom_prompt=${require_custom_prompt}`;
 
-    if (includeTags.length > 0) {
+    if (includeTags && includeTags.length > 0) {
         url += `&include_tags=${encodeURIComponent(includeTags.join(','))}`;
     }
 
-    if (excludeTags.length > 0) {
+    if (excludeTags && excludeTags.length > 0) {
         url += `&exclude_tags=${encodeURIComponent(excludeTags.join(','))}`;
     }
 
@@ -163,7 +163,7 @@ function generateCharacterListItem(character, index) {
         <div class="character-list-item" data-index="${index}">
             <img class="thumbnail" src="${character.url}">
             <div class="info">
-                <div class="name">${character.name || "Default Name"} by ${character.author}</div>
+                <div class="name">${character.name || "Default Name"} <span class="author">by ${character.author}</span></div>
                 <div class="description">${character.description}</div>
                 <div class="tags">${character.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
             </div>
@@ -172,7 +172,6 @@ function generateCharacterListItem(character, index) {
     `;
 }
 
-let savedPopupContent = null;
 
 function displayCharactersInListViewPopup() {
     if (savedPopupContent) {
@@ -186,6 +185,7 @@ function displayCharactersInListViewPopup() {
         characterListContainer = document.querySelector('.character-list-popup');
         return;
     }
+
     const listLayout = popupState ? popupState :`
         <div class="list-and-search-wrapper">
             <div class="character-list-popup">
@@ -197,9 +197,17 @@ function displayCharactersInListViewPopup() {
                 <input type="text" id="includeTags" class="text_pole" placeholder="Include tags (comma separated)">
                 <input type="text" id="excludeTags" class="text_pole" placeholder="Exclude tags (comma separated)">
                 <select class="margin0" id="sortOrder">
-                    <option value="download_count">Most Downloaded</option>
-                    <option value="recent">Most Recent</option>
-                    <!-- Add more sort options as needed -->
+                <option value="download_count">download_count</option>
+                <option value="id">id</option>
+                <option value="rating">rating</option>
+                <option value="default">default</option>
+                <option value="rating_count">rating_count</option>
+                <option value="last_activity_at">last_activity_at</option>
+                <option value="trending_downloads">trending_downloads</option>
+                <option value="created_at">created_at</option>
+                <option value="name">name</option>
+                <option value="n_tokens">n_tokens</option>
+                <option value="random">random</option>
                 </select>
                 <label for="nsfwCheckbox">NSFW:</label>
                 <input type="checkbox" id="nsfwCheckbox">
@@ -257,7 +265,7 @@ function displayCharactersInListViewPopup() {
         const nsfw = document.getElementById('nsfwCheckbox').checked;
         const sort = document.getElementById('sortOrder').value;
 
-        if (searchTerm || includeTags.length || excludeTags.length) { // Only search if there are values
+        if (searchTerm || includeTags.length || excludeTags.length || sort) { // Only search if there are values
             executeCharacterSearch({
                 searchTerm,
                 includeTags,
