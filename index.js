@@ -22,6 +22,8 @@ const defaultSettings = {
 let chubCharacters = [];
 let currentIndex = 0;
 let characterListContainer = null;  // A global variable to hold the reference
+let popupState = null;
+
 
 
 /**
@@ -136,6 +138,7 @@ async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, n
 
 // Execute character search and update UI
 async function executeCharacterSearch(options) {
+    console.log(characterListContainer);
     if (characterListContainer && !document.body.contains(characterListContainer)) {
         characterListContainer = null;
     }
@@ -169,30 +172,51 @@ function generateCharacterListItem(character, index) {
     `;
 }
 
+let savedPopupContent = null;
+
 function displayCharactersInListViewPopup() {
-    const listLayout = `
+    if (savedPopupContent) {
+        // Append the saved content to the popup container
+        callPopup('', "text", '', { okButton: "Close", wide: true, large: true })
+            .then(() => {
+                savedPopupContent = characterListContainer.detach();
+            });
+
+        document.getElementById('yourPopupContainerId').appendChild(savedPopupContent);
+        characterListContainer = document.querySelector('.character-list-popup');
+        return;
+    }
+    const listLayout = popupState ? popupState :`
         <div class="list-and-search-wrapper">
             <div class="character-list-popup">
                 ${chubCharacters.map((character, index) => generateCharacterListItem(character, index)).join('')}
             </div>
+            <hr>
             <div class="search-container">
-                <input type="text" id="characterSearchInput" placeholder="Search for characters...">
-                <input type="text" id="includeTags" placeholder="Include tags (comma separated)">
-                <input type="text" id="excludeTags" placeholder="Exclude tags (comma separated)">
-                <select id="sortOrder">
+                <input type="text" id="characterSearchInput" class="text_pole" placeholder="Search for characters...">
+                <input type="text" id="includeTags" class="text_pole" placeholder="Include tags (comma separated)">
+                <input type="text" id="excludeTags" class="text_pole" placeholder="Exclude tags (comma separated)">
+                <select class="margin0" id="sortOrder">
                     <option value="download_count">Most Downloaded</option>
                     <option value="recent">Most Recent</option>
                     <!-- Add more sort options as needed -->
                 </select>
                 <label for="nsfwCheckbox">NSFW:</label>
                 <input type="checkbox" id="nsfwCheckbox">
-                <button id="characterSearchButton">Search</button>
+                <button class="menu_button" id="characterSearchButton">Search</button>
             </div>
         </div>
     `;
 
+
     // Call the popup with our list layout
-    callPopup(listLayout, "text", '', { okButton: "Close", wide: true, large: true });
+    callPopup(listLayout, "text", '', { okButton: "Close", wide: true, large: true })
+        .then(() => {
+            savedPopupContent = characterListContainer.detach();
+            characterListContainer = null;
+
+        });
+
     characterListContainer = document.querySelector('.character-list-popup');
 
     characterListContainer.addEventListener('mouseover', function (event) {

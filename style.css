@@ -69,22 +69,6 @@
 
 .search-container {
     padding: 10px;
-    border-top: 1px solid #ddd;
     margin-top: 10px;
 }
 
-#characterSearchInput {
-    background-color: transparent;
-    border: none;
-    outline: none;
-    color: var(--SmartThemeBodyColor);
-    display: inline-block;
-    /* Change display to inline-block */
-    vertical-align: middle;
-    /* Align to middle if there's a height discrepancy */
-    width: 200px;
-    font-size: 16px;
-    z-index: 10;
-    margin-left: 10px;
-    /* Give some space between the button and search box */
-}
