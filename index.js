@@ -498,7 +498,6 @@ async function getCharacter(fullPath) {
  * - Finally, it loads any previously saved settings related to this extension.
  */
 jQuery(async () => {
-    const settingsHtml = await $.get("scripts/extensions/third-party/st-chub-search/dropdown.html");
     // put our button in between external_import_button and rm_button_group_chats in the form_character_search_form
     // on hover, should say "Search CHub for characters"
     $("#external_import_button").after('<button id="search-chub" class="menu_button fa-solid fa-cloud-bolt faSmallFontSquareFix" title="Search CHub for characters"></button>');
