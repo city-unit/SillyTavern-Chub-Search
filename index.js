@@ -244,7 +244,11 @@ function generateCharacterListItem(character, index) {
         <div class="character-list-item" data-index="${index}">
             <img class="thumbnail" src="${character.url}">
             <div class="info">
-                <div class="name">${character.name || "Default Name"} <span class="author">by ${character.author}</span></div>
+                
+                <a href="https://chub.ai/characters/${character.fullPath}" target="_blank"><div class="name">${character.name || "Default Name"}</a>
+                <a href="https://chub.ai/users/${character.author}" target="_blank">
+                 <span class="author">by ${character.author}</span>
+                </a></div>
                 <div class="description">${character.description}</div>
                 <div class="tags">${character.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
             </div>

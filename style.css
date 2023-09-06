@@ -15,6 +15,7 @@
     align-items: center;  /* aligns items vertically in the middle */
     margin: 10px 0;      /* space between each list item */
     justify-content: space-between;  /* pushes content to the far edges */
+    max-width: 80vw;
 }
 
 .character-list-item img.thumbnail {
@@ -37,10 +38,17 @@ body img.thumbnail {
     overflow: hidden;  /* in case of long text */
 }
 
+
 .character-list-item .info .name {
     font-weight: bold;  /* Makes the name stand out */
     margin-bottom: 5px;
     text-align: left;  /* aligns content to the left */
+    /* don't change the color due to it being a link */
+    color: var(--SmartThemeBodyColor)
+}
+
+.character-list-item .info .name a{
+    color: var(--SmartThemeBodyColor)
 }
 
 .character-list-item .info .description {
