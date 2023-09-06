@@ -216,7 +216,7 @@ function displayCharactersInListViewPopup() {
         <div class="search-container">
             <div class="flex-container flex-no-wrap flex-align-center">
             <label for="characterSearchInput"><i class="fas fa-search"></i></label>
-            <input type="text" id="characterSearchInput" class="text_pole flex1" placeholder="Search for characters...">
+            <input type="text" id="characterSearchInput" class="text_pole flex1" placeholder="Search CHUB for characters...">
             </div>
             <div class="flex-container flex-no-wrap flex-align-center">
             <label for="includeTags"><i class="fas fa-plus-square"></i></label>

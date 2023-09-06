@@ -55,11 +55,6 @@ body img.thumbnail {
     margin-top: 10px;
 }
 
-.search-container {
-    padding: 10px;
-    margin-top: 10px;
-}
-
 .character-list-item .info .author {
     font-size: 0.8em; /* This makes the author text 80% of its original size. Adjust as needed. */
     color: var(--SmartThemeEmColor)
@@ -69,7 +64,7 @@ body img.thumbnail {
 .page-buttons {
     align-content: center;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
 }
 
 .list-and-search-wrapper .flex-container {
