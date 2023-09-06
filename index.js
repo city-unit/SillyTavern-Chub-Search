@@ -5,7 +5,7 @@ import {
     processDroppedFiles,
     callPopup
 } from "../../../../script.js";
-import { delay } from "../../../utils.js";
+import { delay, debounce } from "../../../utils.js";
 import { extension_settings } from "../../../extensions.js";
 
 const extensionName = "st-chub-search";
@@ -88,6 +88,20 @@ function updateCharacterListInView(characters) {
     }
 }
 
+// no caps, all caps, and first letter caps; also removes spaces
+function makeTagPermutations(tags) {
+    let permutations = [];
+    for (let tag of tags) {
+        if(tag) {
+            permutations.push(tag);
+            permutations.push(tag.toUpperCase());
+            permutations.push(tag[0].toUpperCase() + tag.slice(1));
+        }
+    }
+    return permutations;
+}
+
+
 async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, nsfw, sort, page=1 }) {
 
     let first = extension_settings.chub.findCount;
@@ -104,10 +118,11 @@ async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, n
     let url = `${API_ENDPOINT_SEARCH}?${searchTerm}first=${first}&page=${page}&sort=${sort}&asc=${asc}&include_forks=${include_forks}&nsfw=${nsfw}&require_images=${require_images}&require_custom_prompt=${require_custom_prompt}`;
 
     if (includeTags && includeTags.length > 0) {
-        url += `&include_tags=${encodeURIComponent(includeTags.join(','))}`;
+        url += `&tags=${encodeURIComponent(includeTags.join(','))}`;
     }
 
     if (excludeTags && excludeTags.length > 0) {
+        excludeTags = makeTagPermutations(excludeTags);
         url += `&exclude_tags=${encodeURIComponent(excludeTags.join(','))}`;
     }
 
@@ -145,11 +160,12 @@ async function searchCharacters(options) {
     if (characterListContainer) {
         characterListContainer.classList.add('searching');
     }
+    console.log('Searching for characters', options);
     const characters = await fetchCharactersBySearch(options);
     if (characterListContainer) {
         characterListContainer.classList.remove('searching');
     }
-    
+
     return characters;
 }
 
@@ -311,18 +327,33 @@ async function displayCharactersInListViewPopup() {
         }
     });
 
+    const executeCharacterSearchDebounced = debounce((options) => executeCharacterSearch(options), 750);
+
     // Combine the 'keydown' and 'click' event listeners for search functionality, debounce the inputs
     const handleSearch = async function (e) {
-        if (e.type === 'keydown' && e.key !== 'Enter') return;
+        console.log('handleSearch', e);
+        if (e.type === 'keydown' && e.key !== 'Enter' && e.target.id !== 'includeTags' && e.target.id !== 'excludeTags') {
+            return;
+        }
+
+        const splitAndTrim = (str) => {
+            str = str.trim(); // Trim the entire string first
+            if (!str.includes(',')) {
+                return [str];
+            }
+            return str.split(',').map(tag => tag.trim());
+        };
+
+        console.log(document.getElementById('includeTags').value);
 
         const searchTerm = document.getElementById('characterSearchInput').value;
-        const includeTags = document.getElementById('includeTags').value.split(',').map(tag => tag.trim());
-        const excludeTags = document.getElementById('excludeTags').value.split(',').map(tag => tag.trim());
+        const includeTags = splitAndTrim(document.getElementById('includeTags').value);
+        const excludeTags = splitAndTrim(document.getElementById('excludeTags').value);
         const nsfw = document.getElementById('nsfwCheckbox').checked;
         const sort = document.getElementById('sortOrder').value;
         const page = document.getElementById('pageNumber').value;
-        await delay(500);
-        executeCharacterSearch({
+
+        executeCharacterSearchDebounced({
             searchTerm,
             includeTags,
             excludeTags,
@@ -335,8 +366,8 @@ async function displayCharactersInListViewPopup() {
     // debounce the inputs
     document.getElementById('characterSearchInput').addEventListener('change', handleSearch);
     document.getElementById('characterSearchButton').addEventListener('click', handleSearch);
-    document.getElementById('includeTags').addEventListener('change', handleSearch);
-    document.getElementById('excludeTags').addEventListener('change', handleSearch);
+    document.getElementById('includeTags').addEventListener('keyup', handleSearch);
+    document.getElementById('excludeTags').addEventListener('keyup', handleSearch);
     document.getElementById('sortOrder').addEventListener('change', handleSearch);
     document.getElementById('nsfwCheckbox').addEventListener('change', handleSearch);
 
