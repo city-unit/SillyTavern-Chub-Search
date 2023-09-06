@@ -87,10 +87,9 @@ function updateCharacterListInView(characters) {
     }
 }
 
-async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, nsfw, sort }) {
+async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, nsfw, sort, page=1 }) {
 
     let first = extension_settings.chub.findCount;
-    let page = 1;
     let asc = false;
     let include_forks = false;
     nsfw = nsfw || extension_settings.chub.nsfw;  // Default to extension settings if not provided
@@ -194,35 +193,42 @@ function displayCharactersInListViewPopup() {
         return;
     }
 
-    const listLayout = popupState ? popupState :`
-        <div class="list-and-search-wrapper" id="list-and-search-wrapper">
-            <div class="character-list-popup">
-                ${chubCharacters.map((character, index) => generateCharacterListItem(character, index)).join('')}
-            </div>
-            <hr>
-            <div class="search-container">
-                <input type="text" id="characterSearchInput" class="text_pole" placeholder="Search for characters...">
-                <input type="text" id="includeTags" class="text_pole" placeholder="Include tags (comma separated)">
-                <input type="text" id="excludeTags" class="text_pole" placeholder="Exclude tags (comma separated)">
-                <select class="margin0" id="sortOrder">
-                <option value="download_count">download_count</option>
-                <option value="id">id</option>
-                <option value="rating">rating</option>
-                <option value="default">default</option>
-                <option value="rating_count">rating_count</option>
-                <option value="last_activity_at">last_activity_at</option>
-                <option value="trending_downloads">trending_downloads</option>
-                <option value="created_at">created_at</option>
-                <option value="name">name</option>
-                <option value="n_tokens">n_tokens</option>
-                <option value="random">random</option>
-                </select>
-                <label for="nsfwCheckbox">NSFW:</label>
-                <input type="checkbox" id="nsfwCheckbox">
-                <button class="menu_button" id="characterSearchButton">Search</button>
-            </div>
+    const readableOptions = {
+        "download_count": "Download Count",
+        "id": "ID",
+        "rating": "Rating",
+        "default": "Default",
+        "rating_count": "Rating Count",
+        "last_activity_at": "Last Activity",
+        "trending_downloads": "Trending Downloads",
+        "created_at": "Creation Date",
+        "name": "Name",
+        "n_tokens": "Token Count",
+        "random": "Random"
+    };
+
+    const listLayout = popupState ? popupState : `
+    <div class="list-and-search-wrapper" id="list-and-search-wrapper">
+        <div class="character-list-popup">
+            ${chubCharacters.map((character, index) => generateCharacterListItem(character, index)).join('')}
         </div>
-    `;
+        <hr>
+        <div class="search-container">
+            <input type="text" id="characterSearchInput" class="text_pole" placeholder="Search for characters...">
+            <input type="text" id="includeTags" class="text_pole" placeholder="Include tags (comma separated)">
+            <input type="text" id="excludeTags" class="text_pole" placeholder="Exclude tags (comma separated)">
+        
+            <input type="number" id="pageNumber" class="text_pole textarea_compact" min="1" value="1">
+            <label for="sortOrder">Sort By:</label> <!-- This is the label for sorting -->
+            <select class="margin0" id="sortOrder">
+            ${Object.keys(readableOptions).map(key => `<option value="${key}">${readableOptions[key]}</option>`).join('')}
+            </select>
+            <label for="nsfwCheckbox">NSFW:</label>
+            <input type="checkbox" id="nsfwCheckbox">
+            <button class="menu_button" id="characterSearchButton">Search</button>
+        </div>
+    </div>
+`;
 
 
     // Call the popup with our list layout
@@ -286,20 +292,24 @@ function displayCharactersInListViewPopup() {
         const excludeTags = document.getElementById('excludeTags').value.split(',').map(tag => tag.trim());
         const nsfw = document.getElementById('nsfwCheckbox').checked;
         const sort = document.getElementById('sortOrder').value;
+        const page = document.getElementById('pageNumber').value;
 
-        if (searchTerm || includeTags.length || excludeTags.length || sort) { // Only search if there are values
+        if (searchTerm || includeTags.length || excludeTags.length || sort || page) { // Only search if there are values
             executeCharacterSearch({
                 searchTerm,
                 includeTags,
                 excludeTags,
                 nsfw,
-                sort
+                sort,
+                page
             });
         }
     };
 
     document.getElementById('characterSearchInput').addEventListener('keydown', handleSearch);
     document.getElementById('characterSearchButton').addEventListener('click', handleSearch);
+    // when the page number is finished being changed, search again
+    document.getElementById('pageNumber').addEventListener('change', handleSearch);
 }
 
 
