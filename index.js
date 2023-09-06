@@ -50,6 +50,11 @@ async function loadSettings() {
 
 }
 
+/**
+ * Downloads a custom character based on the provided URL.
+ * @param {string} input - A string containing the URL of the character to be downloaded.
+ * @returns {Promise<void>} - Resolves once the character has been processed or if an error occurs.
+ */
 async function downloadCharacter(input) {
     const url = input.trim();
     console.debug('Custom content import started', url);
@@ -82,13 +87,24 @@ async function downloadCharacter(input) {
     }
 }
 
+/**
+ * Updates the character list in the view based on provided characters.
+ * @param {Array} characters - A list of character data objects to be rendered in the view.
+ */
 function updateCharacterListInView(characters) {
     if (characterListContainer) {
         characterListContainer.innerHTML = characters.map(generateCharacterListItem).join('');
     }
 }
 
-// no caps, all caps, and first letter caps; also removes spaces
+/**
+ * Generates a list of permutations for the given tags. The permutations include:
+ * - Original tag.
+ * - Tag in uppercase.
+ * - Tag with the first letter in uppercase.
+ * @param {Array<string>} tags - List of tags for which permutations are to be generated.
+ * @returns {Array<string>} - A list containing all the tag permutations.
+ */
 function makeTagPermutations(tags) {
     let permutations = [];
     for (let tag of tags) {
@@ -101,7 +117,17 @@ function makeTagPermutations(tags) {
     return permutations;
 }
 
-
+/**
+ * Fetches characters based on specified search criteria.
+ * @param {Object} options - The search options object.
+ * @param {string} [options.searchTerm] - A search term to filter characters by name/description.
+ * @param {Array<string>} [options.includeTags] - A list of tags that the returned characters should include.
+ * @param {Array<string>} [options.excludeTags] - A list of tags that the returned characters should not include.
+ * @param {boolean} [options.nsfw] - Whether or not to include NSFW characters. Defaults to the extension settings.
+ * @param {string} [options.sort] - The criteria by which to sort the characters. Default is by download count.
+ * @param {number} [options.page=1] - The page number for pagination. Defaults to 1.
+ * @returns {Promise<Array>} - Resolves with an array of character objects that match the search criteria.
+ */
 async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, nsfw, sort, page=1 }) {
 
     let first = extension_settings.chub.findCount;
@@ -158,6 +184,11 @@ async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, n
     return chubCharacters;
 }
 
+/**
+ * Searches for characters based on the provided options and manages the UI during the search.
+ * @param {Object} options - The search criteria/options for fetching characters.
+ * @returns {Promise<Array>} - Resolves with an array of character objects that match the search criteria.
+ */
 async function searchCharacters(options) {
     if (characterListContainer && !document.body.contains(characterListContainer)) {
         console.log('Character list container is not in the DOM, removing reference');
@@ -176,10 +207,18 @@ async function searchCharacters(options) {
     return characters;
 }
 
+/**
+ * Opens the character search popup UI.
+ */
 function openSearchPopup() {
     displayCharactersInListViewPopup();
 }
 
+/**
+ * Executes a character search based on provided options and updates the view with the results.
+ * @param {Object} options - The search criteria/options for fetching characters.
+ * @returns {Promise<void>} - Resolves once the character list has been updated in the view.
+ */
 async function executeCharacterSearch(options) {
     let characters  = []
     characters = await searchCharacters(options);
@@ -194,7 +233,12 @@ async function executeCharacterSearch(options) {
 }
 
 
-// Generate a character list item
+/**
+ * Generates the HTML structure for a character list item.
+ * @param {Object} character - The character data object with properties like url, name, description, tags, and author.
+ * @param {number} index - The index of the character in the list.
+ * @returns {string} - Returns an HTML string representation of the character list item.
+ */
 function generateCharacterListItem(character, index) {
     return `
         <div class="character-list-item" data-index="${index}">
@@ -209,6 +253,23 @@ function generateCharacterListItem(character, index) {
     `;
 }
 
+
+/**
+ * Displays a popup for character listings based on certain criteria. The popup provides a UI for 
+ * character search, and presents the characters in a list view. Users can search characters by 
+ * inputting search terms, including/excluding certain tags, sorting by various options, and opting 
+ * for NSFW content. The function also offers image enlargement on click and handles character downloads.
+ * 
+ * If the popup content was previously generated and saved, it reuses that content. Otherwise, it creates 
+ * a new layout using the given state or a default layout structure. 
+ * 
+ * This function manages multiple event listeners for user interactions such as searching, navigating 
+ * between pages, and viewing larger character images.
+ * 
+ * @async
+ * @function
+ * @returns {Promise<void>} - Resolves when the popup is displayed and fully initialized.
+ */
 async function displayCharactersInListViewPopup() {
     if (savedPopupContent) {
         console.log('Using saved popup content');
@@ -237,6 +298,7 @@ async function displayCharactersInListViewPopup() {
         "random": "Random"
     };
 
+    // TODO: This should be a template
     const listLayout = popupState ? popupState : `
     <div class="list-and-search-wrapper" id="list-and-search-wrapper">
         <div class="character-list-popup">
@@ -280,7 +342,6 @@ async function displayCharactersInListViewPopup() {
         </div>
     </div>
 `;
-
 
     // Call the popup with our list layout
     callPopup(listLayout, "text", '', { okButton: "Close", wide: true, large: true })
@@ -398,7 +459,18 @@ async function displayCharactersInListViewPopup() {
     );
 }
 
-
+/**
+ * Fetches a character by making an API call.
+ * 
+ * This function sends a POST request to the API_ENDPOINT_DOWNLOAD with a provided character's fullPath. 
+ * It requests the character in the "tavern" format and the "main" version. Once the data is fetched, it 
+ * is converted to a blob before being returned.
+ * 
+ * @async
+ * @function
+ * @param {string} fullPath - The unique path/reference for the character to be fetched.
+ * @returns {Promise<Blob>} - Resolves with a Blob of the fetched character data.
+ */
 async function getCharacter(fullPath) {
     let response = await fetch(
         API_ENDPOINT_DOWNLOAD,
@@ -419,7 +491,12 @@ async function getCharacter(fullPath) {
     return data;
 }
 
-
+/**
+ * jQuery document-ready block:
+ * - Fetches the HTML settings for an extension from a known endpoint and prepares a button for character search.
+ * - The button, when clicked, triggers the `openSearchPopup` function.
+ * - Finally, it loads any previously saved settings related to this extension.
+ */
 jQuery(async () => {
     const settingsHtml = await $.get("scripts/extensions/third-party/st-chub-search/dropdown.html");
     // put our button in between external_import_button and rm_button_group_chats in the form_character_search_form
