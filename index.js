@@ -1,5 +1,5 @@
 // An extension that allows you to import characters from CHub.
-
+// TODO: allow multiple characters to be imported at once
 import {
     getRequestHeaders,
     processDroppedFiles,
