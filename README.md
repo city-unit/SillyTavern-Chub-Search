@@ -2,14 +2,18 @@
 
 SillyTavern Chub Search is an which provides a quick and easy way to search for new cards from [CHUB](https://www.chub.ai/about) from the comfort of your tavern. 
 
+![image](https://github.com/city-unit/st-chub-search/assets/140349364/6ffe51d3-ac58-4761-909b-7563dfec46f6)
+
 
 ## Installation and Usage
 
-Utilize SillyTavern's third party extension importer.
+Utilize SillyTavern's third party extension importer to install.
 
 ![image](https://github.com/city-unit/st-auto-tagger/assets/1860540/188b8ba5-c121-4357-96f8-a45bd60cf8a5)
 
-![image](https://github.com/city-unit/st-auto-tagger/assets/140349364/ba3e995e-054a-4d08-a85a-f03afa4bbb5b)
+To use the search, click the thunderbolt icon.
+
+![image](https://github.com/city-unit/st-chub-search/assets/140349364/a8857619-54df-43f8-b42d-2635d4c5a412)
 
 
 ## Prerequisites
