@@ -227,16 +227,22 @@ function displayCharactersInListViewPopup() {
             <input type="text" id="excludeTags" class="text_pole flex1" placeholder="Exclude tags (comma separated)">
             </div>
             <div class="page-buttons flex-container flex-no-wrap flex-align-center">
-                <button class="menu_button" id="pageDownButton"><i class="fas fa-chevron-left"></i></button>
-                <label for="pageNumber">Page:</label>
-                <input type="number" id="pageNumber" class="text_pole textarea_compact wide10pMinFit" min="1" value="1">
-                <button class="menu_button" id="pageUpButton"><i class="fas fa-chevron-right"></i></button>
+                <div class="flex-container flex-no-wrap flex-align-center">
+                    <button class="menu_button" id="pageDownButton"><i class="fas fa-chevron-left"></i></button>
+                    <label for="pageNumber">Page:</label>
+                    <input type="number" id="pageNumber" class="text_pole textarea_compact wide10pMinFit" min="1" value="1">
+                    <button class="menu_button" id="pageUpButton"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="flex-container flex-no-wrap flex-align-center">
                 <label for="sortOrder">Sort By:</label> <!-- This is the label for sorting -->
                 <select class="margin0" id="sortOrder">
                 ${Object.keys(readableOptions).map(key => `<option value="${key}">${readableOptions[key]}</option>`).join('')}
                 </select>
-                <label for="nsfwCheckbox">NSFW:</label>
-                <input type="checkbox" id="nsfwCheckbox">
+                </div>
+                <div class="flex-container flex-no-wrap flex-align-center">
+                    <label for="nsfwCheckbox">NSFW:</label>
+                    <input type="checkbox" id="nsfwCheckbox">
+                </div>
                 <button class="menu_button" id="characterSearchButton">Search</button>
             </div>
 
@@ -298,7 +304,7 @@ function displayCharactersInListViewPopup() {
         }
     });
 
-    // Combine the 'keydown' and 'click' event listeners for search functionality
+    // Combine the 'keydown' and 'click' event listeners for search functionality, debounce the inputs
     const handleSearch = function (e) {
         if (e.type === 'keydown' && e.key !== 'Enter') return;
 
@@ -309,20 +315,24 @@ function displayCharactersInListViewPopup() {
         const sort = document.getElementById('sortOrder').value;
         const page = document.getElementById('pageNumber').value;
 
-        if (searchTerm || includeTags.length || excludeTags.length || sort || page) { // Only search if there are values
-            executeCharacterSearch({
-                searchTerm,
-                includeTags,
-                excludeTags,
-                nsfw,
-                sort,
-                page
-            });
-        }
+        executeCharacterSearch({
+            searchTerm,
+            includeTags,
+            excludeTags,
+            nsfw,
+            sort,
+            page
+        });
     };
 
-    document.getElementById('characterSearchInput').addEventListener('keydown', handleSearch);
+    // debounce the inputs
+    document.getElementById('characterSearchInput').addEventListener('change', handleSearch);
     document.getElementById('characterSearchButton').addEventListener('click', handleSearch);
+    document.getElementById('includeTags').addEventListener('change', handleSearch);
+    document.getElementById('excludeTags').addEventListener('change', handleSearch);
+    document.getElementById('sortOrder').addEventListener('change', handleSearch);
+    document.getElementById('nsfwCheckbox').addEventListener('change', handleSearch);
+
     // when the page number is finished being changed, search again
     document.getElementById('pageNumber').addEventListener('change', handleSearch);
     // on page up or down, update the page number 

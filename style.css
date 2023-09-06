@@ -71,3 +71,16 @@ body img.thumbnail {
     align-items: center;
     justify-content: center;
 }
+
+.list-and-search-wrapper .flex-container {
+    display: flex;
+}
+
+.list-and-search-wrapper .flex-align-center {
+    align-items: center;
+}
+
+/* Centering labels in relation to adjacent inputs or icons */
+.list-and-search-wrapper .flex-container label {
+    align-self: center;
+}
