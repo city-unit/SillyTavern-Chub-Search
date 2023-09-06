@@ -136,26 +136,34 @@ async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, n
     return chubCharacters;
 }
 
-// Execute character search and update UI
-async function executeCharacterSearch(options) {
-    console.log(characterListContainer);
+async function searchCharacters(options) {
     if (characterListContainer && !document.body.contains(characterListContainer)) {
+        console.log('Character list container is not in the DOM, removing reference');
         characterListContainer = null;
     }
 
     const characters = await fetchCharactersBySearch(options);
-    if(!characterListContainer) {
-        displayCharactersInListViewPopup();
-    }
 
-    if (characters.length > 0) {
-        if (!characterListContainer) {
-            displayCharactersInListViewPopup();
-        } else {
-            updateCharacterListInView(characters);
-        }
+    return characters;
+}
+
+function openSearchPopup() {
+    displayCharactersInListViewPopup();
+}
+
+async function executeCharacterSearch(options) {
+    let characters  = []
+    characters = await searchCharacters(options);
+
+    if (characters && characters.length > 0) {
+        console.log('Updating character list');
+        updateCharacterListInView(characters);
+    } else {
+        console.log('No characters found');
+        characterListContainer.innerHTML = '<div class="no-characters-found">No characters found</div>';
     }
 }
+
 
 // Generate a character list item
 function generateCharacterListItem(character, index) {
@@ -172,22 +180,22 @@ function generateCharacterListItem(character, index) {
     `;
 }
 
-
 function displayCharactersInListViewPopup() {
     if (savedPopupContent) {
+        console.log('Using saved popup content');
         // Append the saved content to the popup container
         callPopup('', "text", '', { okButton: "Close", wide: true, large: true })
-            .then(() => {
-                savedPopupContent = characterListContainer.detach();
-            });
+        .then(() => {
+            savedPopupContent = document.querySelector('.list-and-search-wrapper');
+        });
 
-        document.getElementById('yourPopupContainerId').appendChild(savedPopupContent);
+        document.getElementById('dialogue_popup_text').appendChild(savedPopupContent);
         characterListContainer = document.querySelector('.character-list-popup');
         return;
     }
 
     const listLayout = popupState ? popupState :`
-        <div class="list-and-search-wrapper">
+        <div class="list-and-search-wrapper" id="list-and-search-wrapper">
             <div class="character-list-popup">
                 ${chubCharacters.map((character, index) => generateCharacterListItem(character, index)).join('')}
             </div>
@@ -220,34 +228,48 @@ function displayCharactersInListViewPopup() {
     // Call the popup with our list layout
     callPopup(listLayout, "text", '', { okButton: "Close", wide: true, large: true })
         .then(() => {
-            savedPopupContent = characterListContainer.detach();
-            characterListContainer = null;
-
+            savedPopupContent = document.querySelector('.list-and-search-wrapper');
         });
 
-    characterListContainer = document.querySelector('.character-list-popup');
+    characterListContainer = document.querySelector('.character-list-popup');   
 
-    characterListContainer.addEventListener('mouseover', function (event) {
+    let clone = null;  // Store reference to the cloned image
+
+    characterListContainer.addEventListener('click', function (event) {
         if (event.target.tagName === 'IMG') {
             const image = event.target;
+
+            if (clone) {  // If clone exists, remove it
+                document.body.removeChild(clone);
+                clone = null;
+                return;  // Exit the function
+            }
+
             const rect = image.getBoundingClientRect();
 
-            const clone = image.cloneNode(true);
+            clone = image.cloneNode(true);
             clone.style.position = 'absolute';
             clone.style.top = `${rect.top + window.scrollY}px`;
             clone.style.left = `${rect.left + window.scrollX}px`;
-            clone.style.transform = 'scale(4)'; // Enlarge by 4 times
-            clone.style.zIndex = 99999; // High value to ensure it's above other elements
+            clone.style.transform = 'scale(4)';  // Enlarge by 4 times
+            clone.style.zIndex = 99999;  // High value to ensure it's above other elements
+            clone.style.objectFit = 'contain';
 
             document.body.appendChild(clone);
 
-            // Cleanup on mouse leave or move out
-            clone.addEventListener('mouseleave', function handler() {
-                document.body.removeChild(clone);
-                clone.removeEventListener('mouseleave', handler);
-            });
+            // Prevent this click event from reaching the document's click listener
+            event.stopPropagation();
         }
     });
+
+    // Add event listener to remove the clone on next click anywhere
+    document.addEventListener('click', function handler() {
+        if (clone) {
+            document.body.removeChild(clone);
+            clone = null;
+        }
+    });
+
 
     characterListContainer.addEventListener('click', async function (event) {
         if (event.target.classList.contains('download-btn')) {
@@ -308,7 +330,7 @@ jQuery(async () => {
     $("#extensions_settings2").append(settingsHtml);
 
     $("#search-chub").on("click", function () {
-        executeCharacterSearch("");
+        openSearchPopup();
     });
 
     loadSettings();
