@@ -174,7 +174,7 @@ function generateCharacterListItem(character, index) {
                 <div class="description">${character.description}</div>
                 <div class="tags">${character.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
             </div>
-            <button class="download-btn" data-path="${character.fullPath}">Download</button>
+            <div data-path="${character.fullPath}" class="menu_button download-btn fa-solid fa-cloud-arrow-down faSmallFontSquareFix"></div>
         </div>
     `;
 }
@@ -217,8 +217,12 @@ function displayCharactersInListViewPopup() {
             <input type="text" id="characterSearchInput" class="text_pole" placeholder="Search for characters...">
             <input type="text" id="includeTags" class="text_pole" placeholder="Include tags (comma separated)">
             <input type="text" id="excludeTags" class="text_pole" placeholder="Exclude tags (comma separated)">
-        
-            <input type="number" id="pageNumber" class="text_pole textarea_compact" min="1" value="1">
+            <div class="page-buttons flex-container">
+                <button class="menu_button" id="pageDownButton"><i class="fas fa-chevron-left"></i></button>
+                <label for="pageNumber">Page:</label>
+                <input type="number" id="pageNumber" class="text_pole textarea_compact wide10pMinFit" min="1" value="1">
+                <button class="menu_button" id="pageUpButton"><i class="fas fa-chevron-right"></i></button>
+            </div>
             <label for="sortOrder">Sort By:</label> <!-- This is the label for sorting -->
             <select class="margin0" id="sortOrder">
             ${Object.keys(readableOptions).map(key => `<option value="${key}">${readableOptions[key]}</option>`).join('')}
@@ -310,6 +314,19 @@ function displayCharactersInListViewPopup() {
     document.getElementById('characterSearchButton').addEventListener('click', handleSearch);
     // when the page number is finished being changed, search again
     document.getElementById('pageNumber').addEventListener('change', handleSearch);
+    // on page up or down, update the page number 
+    document.getElementById('pageUpButton').addEventListener('click', function (e) {
+        let pageNumber = document.getElementById('pageNumber');
+        pageNumber.value = parseInt(pageNumber.value) + 1;
+        handleSearch(e);
+    }
+    );
+    document.getElementById('pageDownButton').addEventListener('click', function (e) {
+        let pageNumber = document.getElementById('pageNumber');
+        pageNumber.value = parseInt(pageNumber.value) - 1;
+        handleSearch(e);
+    }
+    );
 }
 
 

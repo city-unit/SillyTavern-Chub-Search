@@ -17,25 +17,6 @@
     justify-content: space-between;  /* pushes content to the far edges */
 }
 
-.download-btn {
-    background-color: var(--SmartThemeEmColor);
-    border: none;
-    color: white;
-    padding: 8px 15px;  /* adjust padding as needed */
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    margin: 0 10px;  /* optional space between button and edge */
-    cursor: pointer;
-    border-radius: 4px;  /* optional rounded corners */
-}
-
-.download-btn:hover {
-    background-color: #45a049;  /* slightly darker green for hover effect */
-}
-
-
 .character-list-item img.thumbnail {
     flex: 0 0 100px; /* this gives a fixed width of 100px to thumbnails, adjust as needed */
     height: 100px;  /* adjust height as needed */
@@ -81,6 +62,12 @@ body img.thumbnail {
 
 .character-list-item .info .author {
     font-size: 0.8em; /* This makes the author text 80% of its original size. Adjust as needed. */
-    color: var(--SmartThemeQuoteColor)
+    color: var(--SmartThemeEmColor)
 
+}
+
+.page-buttons {
+    align-content: center;
+    align-items: center;
+    justify-content: center;
 }
