@@ -79,3 +79,7 @@ body img.thumbnail {
 .list-and-search-wrapper .flex-container label {
     align-self: center;
 }
+/* Grey out the entire list when searching */
+.searching {
+    filter: grayscale(100%);
+}

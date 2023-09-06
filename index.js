@@ -5,6 +5,7 @@ import {
     processDroppedFiles,
     callPopup
 } from "../../../../script.js";
+import { delay } from "../../../utils.js";
 import { extension_settings } from "../../../extensions.js";
 
 const extensionName = "st-chub-search";
@@ -140,9 +141,15 @@ async function searchCharacters(options) {
         console.log('Character list container is not in the DOM, removing reference');
         characterListContainer = null;
     }
-
+    // grey out the character-list-popup while we're searching
+    if (characterListContainer) {
+        characterListContainer.classList.add('searching');
+    }
     const characters = await fetchCharactersBySearch(options);
-
+    if (characterListContainer) {
+        characterListContainer.classList.remove('searching');
+    }
+    
     return characters;
 }
 
@@ -179,7 +186,7 @@ function generateCharacterListItem(character, index) {
     `;
 }
 
-function displayCharactersInListViewPopup() {
+async function displayCharactersInListViewPopup() {
     if (savedPopupContent) {
         console.log('Using saved popup content');
         // Append the saved content to the popup container
@@ -305,7 +312,7 @@ function displayCharactersInListViewPopup() {
     });
 
     // Combine the 'keydown' and 'click' event listeners for search functionality, debounce the inputs
-    const handleSearch = function (e) {
+    const handleSearch = async function (e) {
         if (e.type === 'keydown' && e.key !== 'Enter') return;
 
         const searchTerm = document.getElementById('characterSearchInput').value;
@@ -314,7 +321,7 @@ function displayCharactersInListViewPopup() {
         const nsfw = document.getElementById('nsfwCheckbox').checked;
         const sort = document.getElementById('sortOrder').value;
         const page = document.getElementById('pageNumber').value;
-
+        await delay(500);
         executeCharacterSearch({
             searchTerm,
             includeTags,
