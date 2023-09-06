@@ -214,22 +214,33 @@ function displayCharactersInListViewPopup() {
         </div>
         <hr>
         <div class="search-container">
-            <input type="text" id="characterSearchInput" class="text_pole" placeholder="Search for characters...">
-            <input type="text" id="includeTags" class="text_pole" placeholder="Include tags (comma separated)">
-            <input type="text" id="excludeTags" class="text_pole" placeholder="Exclude tags (comma separated)">
-            <div class="page-buttons flex-container">
+            <div class="flex-container flex-no-wrap flex-align-center">
+            <label for="characterSearchInput"><i class="fas fa-search"></i></label>
+            <input type="text" id="characterSearchInput" class="text_pole flex1" placeholder="Search for characters...">
+            </div>
+            <div class="flex-container flex-no-wrap flex-align-center">
+            <label for="includeTags"><i class="fas fa-plus-square"></i></label>
+            <input type="text" id="includeTags" class="text_pole flex1" placeholder="Include tags (comma separated)">
+            </div>
+            <div class="flex-container">
+            <label for="excludeTags"><i class="fas fa-minus-square"></i></label>
+            <input type="text" id="excludeTags" class="text_pole flex1" placeholder="Exclude tags (comma separated)">
+            </div>
+            <div class="page-buttons flex-container flex-no-wrap flex-align-center">
                 <button class="menu_button" id="pageDownButton"><i class="fas fa-chevron-left"></i></button>
                 <label for="pageNumber">Page:</label>
                 <input type="number" id="pageNumber" class="text_pole textarea_compact wide10pMinFit" min="1" value="1">
                 <button class="menu_button" id="pageUpButton"><i class="fas fa-chevron-right"></i></button>
+                <label for="sortOrder">Sort By:</label> <!-- This is the label for sorting -->
+                <select class="margin0" id="sortOrder">
+                ${Object.keys(readableOptions).map(key => `<option value="${key}">${readableOptions[key]}</option>`).join('')}
+                </select>
+                <label for="nsfwCheckbox">NSFW:</label>
+                <input type="checkbox" id="nsfwCheckbox">
+                <button class="menu_button" id="characterSearchButton">Search</button>
             </div>
-            <label for="sortOrder">Sort By:</label> <!-- This is the label for sorting -->
-            <select class="margin0" id="sortOrder">
-            ${Object.keys(readableOptions).map(key => `<option value="${key}">${readableOptions[key]}</option>`).join('')}
-            </select>
-            <label for="nsfwCheckbox">NSFW:</label>
-            <input type="checkbox" id="nsfwCheckbox">
-            <button class="menu_button" id="characterSearchButton">Search</button>
+
+
         </div>
     </div>
 `;
