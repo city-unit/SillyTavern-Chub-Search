@@ -2,7 +2,7 @@
 
 SillyTavern Chub Search is an which provides a quick and easy way to search for new cards from [CHUB](https://www.chub.ai/about) from the comfort of your tavern. 
 
-![image](https://github.com/city-unit/st-chub-search/assets/140349364/6ffe51d3-ac58-4761-909b-7563dfec46f6)
+![image](https://github.com/city-unit/SillyTavern-Chub-Search/assets/140349364/648e43ae-3ed0-4673-b024-f4ba7846998c)
 
 
 ## Installation and Usage
