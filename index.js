@@ -335,16 +335,19 @@ function displayCharactersInListViewPopup() {
 
     // when the page number is finished being changed, search again
     document.getElementById('pageNumber').addEventListener('change', handleSearch);
-    // on page up or down, update the page number 
+    // on page up or down, update the page number, don't go below 1
     document.getElementById('pageUpButton').addEventListener('click', function (e) {
-        let pageNumber = document.getElementById('pageNumber');
+        let pageNumber = document.getElementById('pageNumber'); 
+
         pageNumber.value = parseInt(pageNumber.value) + 1;
+        pageNumber.value = Math.max(1, pageNumber.value);
         handleSearch(e);
     }
     );
     document.getElementById('pageDownButton').addEventListener('click', function (e) {
         let pageNumber = document.getElementById('pageNumber');
         pageNumber.value = parseInt(pageNumber.value) - 1;
+        pageNumber.value = Math.max(1, pageNumber.value);
         handleSearch(e);
     }
     );
