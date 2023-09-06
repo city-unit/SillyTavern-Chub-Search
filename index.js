@@ -106,7 +106,7 @@ async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, n
 
     let first = extension_settings.chub.findCount;
     let asc = false;
-    let include_forks = false;
+    let include_forks = true;
     nsfw = nsfw || extension_settings.chub.nsfw;  // Default to extension settings if not provided
     let require_images = false;
     let require_custom_prompt = false;
@@ -117,13 +117,17 @@ async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, n
     // 
     let url = `${API_ENDPOINT_SEARCH}?${searchTerm}first=${first}&page=${page}&sort=${sort}&asc=${asc}&include_forks=${include_forks}&nsfw=${nsfw}&require_images=${require_images}&require_custom_prompt=${require_custom_prompt}`;
 
+    //truncate include and exclude tags to 100 characters
     if (includeTags && includeTags.length > 0) {
-        url += `&tags=${encodeURIComponent(includeTags.join(','))}`;
+        //includeTags = makeTagPermutations(includeTags);
+        includeTags = includeTags.join(',').slice(0, 100);
+        url += `&tags=${encodeURIComponent(includeTags)}`;
     }
 
     if (excludeTags && excludeTags.length > 0) {
-        excludeTags = makeTagPermutations(excludeTags);
-        url += `&exclude_tags=${encodeURIComponent(excludeTags.join(','))}`;
+        //excludeTags = makeTagPermutations(excludeTags);
+        excludeTags = excludeTags.join(',').slice(0, 100);
+        url += `&exclude_tags=${encodeURIComponent(excludeTags)}`;
     }
 
     let searchResponse = await fetch(url);
@@ -133,6 +137,9 @@ async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, n
     // Clear previous search results
     chubCharacters = [];
 
+    if (searchData.nodes.length === 0) {
+        return chubCharacters;
+    }
     let charactersPromises = searchData.nodes.map(node => getCharacter(node.fullPath));
     let characterBlobs = await Promise.all(charactersPromises);
 
@@ -266,7 +273,7 @@ async function displayCharactersInListViewPopup() {
                     <label for="nsfwCheckbox">NSFW:</label>
                     <input type="checkbox" id="nsfwCheckbox">
                 </div>
-                <button class="menu_button" id="characterSearchButton">Search</button>
+                <div class="menu_button" id="characterSearchButton">Search</div>
             </div>
 
 
@@ -415,9 +422,9 @@ async function getCharacter(fullPath) {
 
 jQuery(async () => {
     const settingsHtml = await $.get("scripts/extensions/third-party/st-chub-search/dropdown.html");
-    // Append settingsHtml to extensions_settings
-    $("#extensions_settings2").append(settingsHtml);
-
+    // put our button in between external_import_button and rm_button_group_chats in the form_character_search_form
+    // on hover, should say "Search CHub for characters"
+    $("#external_import_button").after('<button id="search-chub" class="menu_button fa-solid fa-cart-arrow-down faSmallFontSquareFix" title="Search CHub for characters"></button>');
     $("#search-chub").on("click", function () {
         openSearchPopup();
     });
