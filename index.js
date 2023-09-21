@@ -74,7 +74,7 @@ async function downloadCharacter(input) {
     }
 
     if (!request.ok) {
-        toastr.info(request.statusText, 'Custom content import failed');
+        toastr.info("Click to go to the character page", 'Custom content import failed', {onclick: () => window.open(`https://www.chub.ai/characters/${url}`, '_blank') });
         console.error('Custom content import failed', request.status, request.statusText);
         return;
     }
@@ -433,7 +433,14 @@ async function displayCharactersInListViewPopup() {
         const excludeTags = splitAndTrim(document.getElementById('excludeTags').value);
         const nsfw = document.getElementById('nsfwCheckbox').checked;
         const sort = document.getElementById('sortOrder').value;
-        const page = document.getElementById('pageNumber').value;
+        let page = document.getElementById('pageNumber').value;
+
+        // If the page number is not being changed, use page 1
+        if (e.target.id !== 'pageNumber' && e.target.id !== 'pageUpButton' && e.target.id !== 'pageDownButton') {
+            page = 1;
+            // set page box to 1
+            document.getElementById('pageNumber').value = 1;
+        }
 
         executeCharacterSearchDebounced({
             searchTerm,
@@ -501,6 +508,19 @@ async function getCharacter(fullPath) {
         }
     );
 
+    // If the request failed, try a backup endpoint - https://avatars.charhub.io/{fullPath}/avatar.webp
+    if (!response.ok) {
+        console.log(`Request failed for ${fullPath}, trying backup endpoint`);
+        response = await fetch(
+            `https://avatars.charhub.io/avatars/${fullPath}/avatar.webp`,
+            {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }
+        );
+    }
     let data = await response.blob();
     return data;
 }
