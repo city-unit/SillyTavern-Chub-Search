@@ -141,15 +141,17 @@ async function fetchCharactersBySearch({ searchTerm, includeTags, excludeTags, n
 
     // Construct the URL with the search parameters, if any
     // 
-    let url = `${API_ENDPOINT_SEARCH}?${searchTerm}first=${first}&page=${page}&sort=${sort}&asc=${asc}&include_forks=${include_forks}&nsfw=${nsfw}&require_images=${require_images}&require_custom_prompt=${require_custom_prompt}`;
+    let url = `${API_ENDPOINT_SEARCH}?${searchTerm}first=${first}&page=${page}&sort=${sort}&asc=${asc}&venus=true&include_forks=${include_forks}&nsfw=${nsfw}&require_images=${require_images}&require_custom_prompt=${require_custom_prompt}`;
 
     //truncate include and exclude tags to 100 characters
+    includeTags = includeTags.filter(tag => tag.length > 0);
     if (includeTags && includeTags.length > 0) {
         //includeTags = makeTagPermutations(includeTags);
         includeTags = includeTags.join(',').slice(0, 100);
         url += `&tags=${encodeURIComponent(includeTags)}`;
     }
-
+    //remove tags that contain no characters
+    excludeTags = excludeTags.filter(tag => tag.length > 0);
     if (excludeTags && excludeTags.length > 0) {
         //excludeTags = makeTagPermutations(excludeTags);
         excludeTags = excludeTags.join(',').slice(0, 100);
