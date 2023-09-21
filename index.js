@@ -58,12 +58,20 @@ async function loadSettings() {
 async function downloadCharacter(input) {
     const url = input.trim();
     console.debug('Custom content import started', url);
-
-    const request = await fetch('/import_custom', {
+    let request = null;
+    // try /api/content/import first and then /import_custom
+    request = await fetch('/api/content/import', {
         method: 'POST',
         headers: getRequestHeaders(),
         body: JSON.stringify({ url }),
     });
+    if (!request.ok) {  
+        request = await fetch('/import_custom', {
+            method: 'POST',
+            headers: getRequestHeaders(),
+            body: JSON.stringify({ url }),
+        });
+    }
 
     if (!request.ok) {
         toastr.info(request.statusText, 'Custom content import failed');
